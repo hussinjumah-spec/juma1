@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FormFlow - نظام النماذج الذكي</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Landing Page -->
+  <div id="landing-page" class="page">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <div class="brand-icon">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <span class="brand-name">FormFlow</span>
+        </div>
+        <div class="nav-actions">
+          <button class="btn btn-ghost" onclick="showPage('login-page')">
+            <i class="fas fa-sign-in-alt"></i>
+            تسجيل الدخول
+          </button>
+          <button class="btn btn-primary" onclick="showPage('login-page')">
+            <i class="fas fa-rocket"></i>
+            ابدأ الآن
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-bg">
+        <div class="hero-blob blob-1"></div>
+        <div class="hero-blob blob-2"></div>
+        <div class="hero-blob blob-3"></div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-badge animate-fade-in">
+          <i class="fas fa-sparkles"></i>
+          <span>الجيل الجديد من النماذج الذكية</span>
+        </div>
+        <h1 class="hero-title animate-fade-in-up">
+          أنشئ نماذجك <br>
+          <span class="gradient-text">باحترافية تامة</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-in-up">
+          منصة متكاملة لإنشاء النماذج والاستبيانات والاختبارات مع تحليلات فورية وتقارير شاملة
+        </p>
+        <div class="hero-cta animate-fade-in-up">
+          <button class="btn btn-hero" onclick="showPage('login-page')">
+            <i class="fas fa-play"></i>
+            ابدأ مجاناً
+          </button>
+          <button class="btn btn-hero-outline" onclick="scrollToFeatures()">
+            <i class="fas fa-eye"></i>
+            استعرض الميزات
+          </button>
+        </div>
+        <div class="hero-stats animate-fade-in-up">
+          <div class="stat-item">
+            <span class="stat-number">٥٠+</span>
+            <span class="stat-label">نوع سؤال</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">١٠٠%</span>
+            <span class="stat-label">مجاني</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">∞</span>
+            <span class="stat-label">نماذج لا محدودة</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-preview animate-fade-in-right">
+        <div class="preview-card">
+          <div class="preview-header">
+            <div class="preview-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span>نموذج تقييم</span>
+          </div>
+          <div class="preview-body">
+            <div class="preview-question">
+              <div class="preview-q-label">سؤال ١</div>
+              <div class="preview-q-text">ما مدى رضاك عن الخدمة؟</div>
+              <div class="preview-options">
+                <div class="preview-option selected">ممتاز جداً</div>
+                <div class="preview-option">جيد</div>
+                <div class="preview-option">مقبول</div>
+              </div>
+            </div>
+            <div class="preview-progress">
+              <div class="preview-progress-bar" style="width: 33%"></div>
+            </div>
+            <div class="preview-nav">
+              <button class="preview-btn">التالي</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">كل ما تحتاجه في مكان واحد</h2>
+          <p class="section-subtitle">ميزات متكاملة لإنشاء وإدارة النماذج باحترافية</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #667eea, #764ba2)">
+              <i class="fas fa-layer-group"></i>
+            </div>
+            <h3>أنواع أسئلة متعددة</h3>
+            <p>اختيار متعدد، صح/خطأ، إجابة قصيرة، فقرة، ورفع ملفات</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c)">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <h3>تقارير فورية</h3>
+            <p>تحليلات شاملة لكل إجابة مع إمكانية التصدير إلى Excel</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe)">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3>نظام صلاحيات</h3>
+            <p>تحكم كامل بصلاحيات المدراء والمستخدمين</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7)">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3>متجاوب بالكامل</h3>
+            <p>تصميم يعمل على جميع الأجهزة والشاشات</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #fa709a, #fee140)">
+              <i class="fas fa-link"></i>
+            </div>
+            <h3>روابط مخصصة</h3>
+            <p>رابط فريد لكل نموذج يمكن مشاركته بسهولة</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb)">
+              <i class="fas fa-database"></i>
+            </div>
+            <h3>قاعدة بيانات قوية</h3>
+            <p>تخزين آمن لجميع البيانات والإجابات</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <i class="fas fa-bolt"></i>
+          FormFlow
+        </div>
+        <p>نظام نماذج ذكي ومتكامل</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Login Page -->
+  <div id="login-page" class="page">
+    <div class="auth-container">
+
+      <div class="auth-right">
+        <div class="auth-card">
+          <div class="card-login-title">
+            <i class="fas fa-lock"></i>
+            <h3>تسجيل الدخول</h3>
+          </div>
+
+          <!-- Login Form -->
+          <div id="login-form" class="auth-form">
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> الاسم</label>
+              <input type="text" id="login-email" placeholder="أدخل اسمك..." class="form-control">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-lock"></i> كلمة المرور</label>
+              <div class="input-group">
+                <input type="password" id="login-password" placeholder="••••••••" class="form-control">
+                <button class="input-toggle" onclick="togglePasswordVisibility('login-password')">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-options">
+              <label class="checkbox-label">
+                <input type="checkbox" id="remember-me" checked>
+                <span>ذكرني</span>
+              </label>
+            </div>
+            <button class="btn btn-primary full-width" onclick="handleLogin()">
+              <span class="btn-text">تسجيل الدخول</span>
+              <i class="fas fa-arrow-left"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="admin-dashboard" class="page">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon small">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <span>FormFlow</span>
+        </div>
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <span class="nav-section-title">الرئيسية</span>
+          <a class="nav-item active" onclick="showSection('overview')" href="#">
+            <i class="fas fa-home"></i>
+            <span>نظرة عامة</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <span class="nav-section-title">إدارة النماذج</span>
+          <a class="nav-item" onclick="showSection('forms')" href="#">
+            <i class="fas fa-file-alt"></i>
+            <span>النماذج</span>
+            <span class="nav-badge" id="forms-count">0</span>
+          </a>
+          <a class="nav-item" onclick="initNewForm(); showSection('create-form')" href="#">
+            <i class="fas fa-plus-circle"></i>
+            <span>نموذج جديد</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <span class="nav-section-title">التقارير</span>
+          <a class="nav-item" onclick="showSection('responses')" href="#">
+            <i class="fas fa-poll"></i>
+            <span>الإجابات</span>
+            <span class="nav-badge" id="responses-count">0</span>
+          </a>
+          <a class="nav-item" onclick="showSection('analytics')" href="#">
+            <i class="fas fa-chart-line"></i>
+            <span>التحليلات</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <span class="nav-section-title">الإعدادات</span>
+          <a class="nav-item" onclick="showSection('settings')" href="#">
+            <i class="fas fa-cog"></i>
+            <span>الإعدادات</span>
+          </a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="admin-avatar">م</div>
+          <div class="user-details">
+            <span class="user-name" id="admin-name">المدير</span>
+            <span class="user-role">مدير النظام</span>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="breadcrumb" id="breadcrumb">
+            <i class="fas fa-home"></i>
+            <span>نظرة عامة</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="بحث..." id="global-search">
+          </div>
+          <button class="topbar-btn" onclick="showNotifications()">
+            <i class="fas fa-bell"></i>
+            <span class="notif-dot"></span>
+          </button>
+          <div class="topbar-user" onclick="showSection('settings')">
+            <div class="user-avatar small" id="topbar-avatar">م</div>
+            <span id="topbar-name">المدير</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sections -->
+      <div class="sections-container">
+
+        <!-- Overview Section -->
+        <section id="section-overview" class="section active">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title">نظرة عامة</h2>
+              <p class="section-desc">مرحباً! هنا ملخص نشاطك</p>
+            </div>
+            <button class="btn btn-primary" onclick="showSection('create-form')">
+              <i class="fas fa-plus"></i> نموذج جديد
+            </button>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card" style="--color: #667eea">
+              <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="total-forms">0</span>
+                <span class="stat-name">إجمالي النماذج</span>
+              </div>
+              <div class="stat-trend up"><i class="fas fa-arrow-up"></i> نشط</div>
+            </div>
+            <div class="stat-card" style="--color: #f093fb">
+              <div class="stat-icon"><i class="fas fa-poll"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="total-responses">0</span>
+                <span class="stat-name">إجمالي الإجابات</span>
+              </div>
+              <div class="stat-trend up"><i class="fas fa-arrow-up"></i> هذا الأسبوع</div>
+            </div>
+            <div class="stat-card" style="--color: #4facfe">
+              <div class="stat-icon"><i class="fas fa-toggle-on"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="active-forms">0</span>
+                <span class="stat-name">النماذج النشطة</span>
+              </div>
+              <div class="stat-trend neutral"><i class="fas fa-circle"></i> مفعّل</div>
+            </div>
+            <div class="stat-card" style="--color: #43e97b">
+              <div class="stat-icon"><i class="fas fa-users"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="total-users">0</span>
+                <span class="stat-name">المستجيبون</span>
+              </div>
+              <div class="stat-trend up"><i class="fas fa-arrow-up"></i> مشارك</div>
+            </div>
+          </div>
+
+          <div class="overview-grid">
+            <div class="overview-card">
+              <div class="card-header">
+                <h3>أحدث النماذج</h3>
+                <button class="btn-link" onclick="showSection('forms')">عرض الكل</button>
+              </div>
+              <div id="recent-forms-list" class="recent-list">
+                <div class="empty-state-small">
+                  <i class="fas fa-file-circle-plus"></i>
+                  <p>لا توجد نماذج بعد</p>
+                </div>
+              </div>
+            </div>
+            <div class="overview-card">
+              <div class="card-header">
+                <h3>آخر الإجابات</h3>
+                <button class="btn-link" onclick="showSection('responses')">عرض الكل</button>
+              </div>
+              <div id="recent-responses-list" class="recent-list">
+                <div class="empty-state-small">
+                  <i class="fas fa-comment-slash"></i>
+                  <p>لا توجد إجابات بعد</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Forms Section -->
+        <section id="section-forms" class="section">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title">النماذج</h2>
+              <p class="section-desc">إدارة جميع النماذج والاستبيانات</p>
+            </div>
+            <button class="btn btn-primary" onclick="initNewForm(); showSection('create-form')">
+              <i class="fas fa-plus"></i> نموذج جديد
+            </button>
+          </div>
+          <div class="filter-bar">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="بحث في النماذج..." id="forms-search" oninput="filterForms()">
+            </div>
+            <div class="filter-btns">
+              <button class="filter-btn active" onclick="filterByStatus('all', this)">الكل</button>
+              <button class="filter-btn" onclick="filterByStatus('active', this)">نشط</button>
+              <button class="filter-btn" onclick="filterByStatus('inactive', this)">معطّل</button>
+            </div>
+          </div>
+          <div id="forms-grid" class="forms-grid">
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fas fa-file-circle-plus"></i></div>
+              <h3>لا توجد نماذج</h3>
+              <p>ابدأ بإنشاء نموذجك الأول الآن</p>
+              <button class="btn btn-primary" onclick="initNewForm(); showSection('create-form')">
+                <i class="fas fa-plus"></i> إنشاء نموذج
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Create/Edit Form Section -->
+        <section id="section-create-form" class="section">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title" id="form-editor-title">إنشاء نموذج جديد</h2>
+              <p class="section-desc">أضف معلومات النموذج وأسئلته</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-ghost" onclick="showSection('forms')">
+                <i class="fas fa-times"></i> إلغاء
+              </button>
+              <button class="btn btn-success" onclick="saveForm()">
+                <i class="fas fa-save"></i> حفظ النموذج
+              </button>
+            </div>
+          </div>
+          <div class="form-editor">
+            <!-- Form Settings -->
+            <div class="editor-card form-settings-card">
+              <div class="form-logo-section">
+                <div class="logo-preview" id="form-logo-preview" onclick="document.getElementById('form-logo-input').click()">
+                  <i class="fas fa-image"></i>
+                  <span>إضافة شعار</span>
+                </div>
+                <input type="file" id="form-logo-input" accept="image/*" hidden onchange="handleLogoUpload(event)">
+              </div>
+              <div class="form-meta">
+                <div class="form-group">
+                  <label>عنوان النموذج *</label>
+                  <input type="text" id="form-title" class="form-control large" placeholder="أدخل عنوان النموذج">
+                </div>
+                <div class="form-group">
+                  <label>وصف النموذج</label>
+                  <textarea id="form-description" class="form-control" rows="2" placeholder="وصف اختياري للنموذج"></textarea>
+                </div>
+                <div class="form-group">
+                  <label><i class="fab fa-google"></i> رابط ربط Google Sheets (Apps Script)</label>
+                  <input type="url" id="form-webhook" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+                  <p class="help-text" style="font-size:.7rem;margin-top:.3rem;color:var(--text-muted)">سيتم إرسال الإجابات تلقائياً لهذا الرابط عند كل إرسال جديد.</p>
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-file-excel"></i> رابط مشاهدة الردود المباشر</label>
+                  <input type="url" id="form-sheet-url" class="form-control" placeholder="https://docs.google.com/spreadsheets/d/...">
+                  <p class="help-text" style="font-size:.7rem;margin-top:.3rem;color:var(--text-muted)">الصق هنا رابط ملف الإكسيل لمشاركته لاحقاً مع المعنيين بمشاهدة الإجابات أولاً بأول.</p>
+                </div>
+                <div class="form-options-row">
+                  <div class="form-option">
+                    <label>نمط العرض</label>
+                    <select id="form-display-mode" class="form-control">
+                      <option value="one-by-one">سؤال بسؤال</option>
+                      <option value="all-at-once">جميع الأسئلة</option>
+                    </select>
+                  </div>
+                  <div class="form-option">
+                    <label>نوع النموذج</label>
+                    <select id="form-type" class="form-control">
+                      <option value="survey">استبيان</option>
+                      <option value="quiz">اختبار</option>
+                    </select>
+                  </div>
+                  <div class="form-option">
+                    <label>الحالة</label>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="form-active" checked>
+                      <span class="toggle-slider"></span>
+                      <span class="toggle-label" id="form-active-label">نشط</span>
+                    </label>
+                  </div>
+                  <div class="form-option">
+                    <label>إظهار النتيجة (للاختبار)</label>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="form-show-score" checked>
+                      <span class="toggle-slider"></span>
+                      <span class="toggle-label">عرض النتيجة</span>
+                    </label>
+                  </div>
+                  <div class="form-option">
+                    <label>تحميل PDF للمشارك</label>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="form-show-pdf" checked>
+                      <span class="toggle-slider"></span>
+                      <span class="toggle-label">إظهار الزر</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Questions List -->
+            <div id="questions-container">
+              <!-- Questions will be added here -->
+            </div>
+
+            <!-- Add Question Button -->
+            <div class="add-question-area">
+              <div class="add-question-types">
+                <button class="add-type-btn" onclick="addQuestion('multiple-choice')">
+                  <i class="fas fa-list-ul"></i>
+                  <span>اختيار متعدد</span>
+                </button>
+                <button class="add-type-btn" onclick="addQuestion('true-false')">
+                  <i class="fas fa-check-double"></i>
+                  <span>صح أو خطأ</span>
+                </button>
+                <button class="add-type-btn" onclick="addQuestion('short-answer')">
+                  <i class="fas fa-minus"></i>
+                  <span>إجابة قصيرة</span>
+                </button>
+                <button class="add-type-btn" onclick="addQuestion('paragraph')">
+                  <i class="fas fa-align-right"></i>
+                  <span>فقرة</span>
+                </button>
+                <button class="add-type-btn" onclick="addQuestion('file-upload')">
+                  <i class="fas fa-image"></i>
+                  <span>رفع صورة</span>
+                </button>
+                <button class="add-type-btn" onclick="addQuestion('file-upload-general')">
+                  <i class="fas fa-file-arrow-up"></i>
+                  <span>رفع ملف</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Responses Section -->
+        <section id="section-responses" class="section">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title">الإجابات والنتائج</h2>
+              <p class="section-desc">عرض جميع الإجابات المقدمة</p>
+            </div>
+            <div class="header-actions">
+              <select class="form-control" id="response-form-filter" onchange="loadResponsesByForm()">
+                <option value="all">جميع النماذج</option>
+              </select>
+              <button class="btn btn-success" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i> تصدير Excel
+              </button>
+              <button class="btn btn-primary" onclick="exportToCSV()">
+                <i class="fas fa-file-csv"></i> تصدير CSV
+              </button>
+            </div>
+          </div>
+          <div class="responses-table-wrapper">
+            <table class="responses-table" id="responses-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم المشارك</th>
+                  <th>النموذج</th>
+                  <th>النتيجة</th>
+                  <th>التاريخ</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="responses-tbody">
+                <tr>
+                  <td colspan="6" class="empty-table">
+                    <i class="fas fa-inbox"></i>
+                    <p>لا توجد إجابات بعد</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="section-analytics" class="section">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title">التحليلات والنتائج</h2>
+              <p class="section-desc">إحصائيات ورسوم بيانية تفصيلية لكل سؤال</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-ghost" onclick="downloadAnalyticsPdf()" title="تحميل التقرير كـ PDF">
+                <i class="fas fa-file-pdf" style="color:var(--danger)"></i> تحميل التقرير
+              </button>
+              <select id="analytics-form-filter" class="form-control" style="width:250px" onchange="renderAnalytics()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+          </div>
+          <div id="analytics-content">
+            <div class="analytics-grid">
+              <div class="analytics-card full">
+                <h3>الإجابات حسب النموذج</h3>
+                <div id="chart-container" class="chart-container">
+                  <canvas id="responses-chart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="section-settings" class="section">
+          <div class="section-header-row">
+            <div>
+              <h2 class="section-title">الإعدادات</h2>
+              <p class="section-desc">إدارة حسابك وتفضيلاتك</p>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <div class="settings-card">
+              <h3><i class="fas fa-user-circle"></i> الملف الشخصي</h3>
+              <div class="settings-avatar-section">
+                <div class="settings-avatar" id="settings-avatar">م</div>
+                <button class="btn btn-ghost btn-sm">تغيير الصورة</button>
+              </div>
+              <div class="form-group">
+                <label>الاسم</label>
+                <input type="text" id="settings-name" class="form-control" placeholder="اسمك">
+              </div>
+              <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="settings-email" class="form-control" placeholder="بريدك الإلكتروني">
+              </div>
+              <button class="btn btn-primary" onclick="saveProfile()">
+                <i class="fas fa-save"></i> حفظ التغييرات
+              </button>
+            </div>
+            <div class="settings-card">
+              <h3><i class="fas fa-key"></i> تغيير كلمة المرور</h3>
+              <div class="form-group">
+                <label>كلمة المرور الحالية</label>
+                <input type="password" id="current-password" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>كلمة المرور الجديدة</label>
+                <input type="password" id="new-password" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>تأكيد كلمة المرور</label>
+                <input type="password" id="confirm-new-password" class="form-control">
+              </div>
+              <button class="btn btn-primary" onclick="changePassword()">
+                <i class="fas fa-lock"></i> تغيير كلمة المرور
+              </button>
+            </div>
+            <div class="settings-card">
+              <h3><i class="fas fa-palette"></i> المظهر</h3>
+              <div class="theme-options">
+                <div class="theme-option active" onclick="setTheme('dark')">
+                  <div class="theme-preview dark-preview"></div>
+                  <span>داكن</span>
+                </div>
+                <div class="theme-option" onclick="setTheme('light')">
+                  <div class="theme-preview light-preview"></div>
+                  <span>فاتح</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="settings-card">
+            <h3><i class="fas fa-cloud"></i> التزامن السحابي (Cloud Sync)</h3>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem">اربط كل أجهزتك معاً باستخدام رابط مزامنة واحد من Google Sheets.</p>
+            <div class="form-group">
+              <label>رابط التزامن العالمي</label>
+              <input type="url" id="global-sync-url" class="form-control" onchange="saveSyncUrl()" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+            <div style="display:flex;gap:1.5rem;margin:1rem 0">
+              <label class="checkbox-label">
+                <input type="checkbox" id="auto-sync" onchange="saveSyncUrl()" checked>
+                <span>تزامن تلقائي عند الفتح</span>
+              </label>
+            </div>
+            <div style="display:flex;gap:1rem">
+              <button class="btn btn-primary" id="btn-push-cloud" onclick="pushToCloud()">
+                <i class="fas fa-upload"></i> رفع للسحاب
+              </button>
+              <button class="btn btn-ghost" id="btn-pull-cloud" onclick="pullFromCloud()">
+                <i class="fas fa-download"></i> سحب من السحاب
+              </button>
+            </div>
+          </div>
+          <div class="settings-card">
+            <h3><i class="fas fa-database"></i> إدارة البيانات والنسخ الاحتياطي</h3>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem">تصدير واستيراد قاعدة البيانات بالكامل للتنقل بين الأجهزة.</p>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="exportDatabase()">
+                <i class="fas fa-file-export"></i> تصدير (JSON)
+              </button>
+              <button class="btn btn-ghost" onclick="document.getElementById('import-db-input').click()">
+                <i class="fas fa-file-import"></i> استيراد
+              </button>
+              <input type="file" id="import-db-input" hidden accept=".json" onchange="importDatabase(event)">
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Form Viewer (User Side) -->
+  <div id="form-viewer" class="page">
+    <div class="form-viewer-container">
+      <div class="form-viewer-header">
+        <div id="form-logo-display" class="form-logo"></div>
+        <h1 id="viewer-form-title" class="viewer-title"></h1>
+        <p id="viewer-form-desc" class="viewer-desc"></p>
+        <div class="progress-container">
+          <div class="progress-info">
+            <span id="progress-text">سؤال 1 من 1</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="viewer-questions-container" class="viewer-questions">
+        <!-- Questions rendered here -->
+      </div>
+
+      <!-- Navigation (for one-by-one mode) -->
+      <div class="viewer-nav" id="viewer-nav">
+        <button class="btn btn-ghost" id="prev-btn" onclick="prevQuestion()">
+          <i class="fas fa-chevron-right"></i> السابق
+        </button>
+        <div class="nav-dots" id="nav-dots"></div>
+        <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">
+          التالي <i class="fas fa-chevron-left"></i>
+        </button>
+      </div>
+
+      <div class="viewer-footer">
+        <button class="btn btn-hero" id="submit-btn" onclick="submitForm()">
+          <i class="fas fa-paper-plane"></i>
+          إرسال الإجابات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Page -->
+  <div id="result-page" class="page">
+    <div class="result-container">
+      <div class="result-card">
+        <div class="result-animation">
+          <div class="result-circle" id="result-circle">
+            <svg viewBox="0 0 100 100">
+              <circle class="result-track" cx="50" cy="50" r="45"/>
+              <circle class="result-progress" id="result-progress-circle" cx="50" cy="50" r="45"/>
+            </svg>
+            <div class="result-score">
+              <span id="result-score-value">--</span>
+            </div>
+          </div>
+        </div>
+        <div class="result-info">
+          <h2 id="result-title">شكراً لك!</h2>
+          <p id="result-message">تم إرسال إجاباتك بنجاح</p>
+          <div id="result-details" class="result-details"></div>
+          
+          <div id="pdf-download-container" style="margin-top:2rem;display:none">
+            <button class="btn btn-primary" onclick="downloadResponsePdf()">
+              <i class="fas fa-file-pdf"></i> تحميل تقرير الإجابات (PDF)
+            </button>
+            <p style="font-size:1.1rem; font-weight:600; margin-top:1rem; color:var(--primary);">شكراً لمشاركتك! 🎉</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Template (Hidden) -->
+  <div id="pdf-template" style="display:none; padding: 40px; direction: rtl; font-family: 'Outfit', sans-serif;">
+    <div style="text-align:center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
+        <div id="pdf-logo" style="margin-bottom: 15px;"></div>
+        <h1 id="pdf-form-title" style="color: #2c3e50; margin: 0;"></h1>
+        <p id="pdf-participant-info" style="color: #7f8c8d; font-size: 1.1rem; margin-top: 10px;"></p>
+    </div>
+    
+    <div id="pdf-score-summary" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 30px; text-align: center;">
+        <h2 style="margin: 0; color: #2c3e50;">النتيجة: <span id="pdf-score-text"></span></h2>
+    </div>
+
+    <div id="pdf-questions-list"></div>
+    
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px; color: #95a5a6; font-size: 0.8rem;">
+        تم الإنشاء بواسطة منصة FormFlow
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+    <div class="modal" id="main-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">عنوان</h3>
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="js/database.js?v=2"></script>
+  <script src="js/auth.js?v=2"></script>
+  <script src="js/forms.js?v=2"></script>
+  <script src="js/viewer.js?v=2"></script>
+  <script src="js/analytics.js?v=2"></script>
+  <script src="js/app.js?v=2"></script>
+</body>
+</html>

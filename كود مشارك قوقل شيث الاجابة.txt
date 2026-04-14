@@ -1,0 +1,43 @@
+/*
+  ========================================================================
+  FORMFLOW ULTIMATE SYNC & RESPONSE SCRIPT
+  ========================================================================
+*/
+
+var DATABASE_SHEET = "Cloud_Database"; // ورقة المزامنة
+var RESPONSES_SHEET = "Responses_Data"; // ورقة الإجابات
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  // الحالة 1: مزامنة القاعدة بالكامل (Cloud Sync)
+  if (Object.keys(data).some(function(k) { return k.indexOf('formflow_') === 0; })) {
+    var syncSheet = ss.getSheetByName(DATABASE_SHEET) || ss.insertSheet(DATABASE_SHEET);
+    syncSheet.getRange(1, 1).setValue(e.postData.contents);
+    return ContentService.createTextOutput("Sync Success").setMimeType(ContentService.MimeType.TEXT);
+  } 
+  
+  // الحالة 2: حفظ إجابة فردية (Form Submission)
+  else {
+    var respSheet = ss.getSheetByName(RESPONSES_SHEET) || ss.insertSheet(RESPONSES_SHEET);
+    
+    // إضافة العناوين إذا كانت الورقة جديدة
+    if (respSheet.getLastRow() === 0) {
+      respSheet.appendRow(Object.keys(data));
+    }
+    
+    // إضافة بيانات الإجابة
+    respSheet.appendRow(Object.values(data));
+    return ContentService.createTextOutput("Response Saved").setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+function doGet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(DATABASE_SHEET);
+  // سحب آخر نسخة مخزنة من قاعدة البيانات
+  var data = sheet ? sheet.getRange(1, 1).getValue() : "{}";
+  
+  return ContentService.createTextOutput(data).setMimeType(ContentService.MimeType.JSON);
+}

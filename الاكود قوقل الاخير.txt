@@ -1,0 +1,94 @@
+/*
+  ========================================================================
+  FORMFLOW ULTIMATE SYNC & RESPONSE SCRIPT (V3 - SECURE & CHUNKED)
+  ========================================================================
+  تم تحديث هذا الكود لاستقبال الإجابات المفردة وإدخالها بأمان إلى قاعدة البيانات السحابية 
+  مباشرة دون قيام المستخدم بمسح أو تعديل بيانات المدير.
+*/
+
+var DATABASE_SHEET = "Cloud_Database"; // ورقة المزامنة
+var RESPONSES_SHEET = "Responses_Data"; // ورقة الإجابات
+var MAX_CELL_LENGTH = 49000;
+
+function getFullCloudDatabase(ss) {
+  var sheet = ss.getSheetByName(DATABASE_SHEET);
+  if (!sheet) return "{}";
+  var values = sheet.getRange(1, 1, sheet.getLastRow() || 1, 1).getValues();
+  var fullString = values.map(function(row) { return row[0]; }).join('');
+  return fullString || "{}";
+}
+
+function saveFullCloudDatabase(ss, payloadString) {
+  var syncSheet = ss.getSheetByName(DATABASE_SHEET) || ss.insertSheet(DATABASE_SHEET);
+  syncSheet.clear();
+  var chunks = [];
+  for (var i = 0; i < payloadString.length; i += MAX_CELL_LENGTH) {
+    chunks.push([payloadString.substring(i, i + MAX_CELL_LENGTH)]);
+  }
+  if (chunks.length > 0) {
+    syncSheet.getRange(1, 1, chunks.length, 1).setValues(chunks);
+  }
+}
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var payloadString = e.postData.contents;
+  var data = JSON.parse(payloadString);
+  
+  // الحالة 1: الإدارة تقوم برفع قاعدة البيانات بالكامل أو تحديثها
+  if (Object.keys(data).some(function(k) { return k.indexOf('formflow_') === 0; })) {
+    saveFullCloudDatabase(ss, payloadString);
+    return ContentService.createTextOutput("Sync Success").setMimeType(ContentService.MimeType.TEXT);
+  } 
+  
+  // الحالة 2: مشارك قام بإرسال إجابة جديدة
+  else if (data.type === 'individual_response') {
+    var respSheet = ss.getSheetByName(RESPONSES_SHEET) || ss.insertSheet(RESPONSES_SHEET);
+    var flatData = data.flatData;
+    
+    // إضافة الإجابة للإكسيل الخاص بالعرض
+    if (respSheet.getLastRow() === 0) respSheet.appendRow(Object.keys(flatData));
+    var safeValues = Object.values(flatData).map(function(val) {
+      if (typeof val === 'string' && val.length > MAX_CELL_LENGTH) return "[صورة محفوظة في النظام]";
+      return val;
+    });
+    respSheet.appendRow(safeValues);
+    
+    // إضافة الإجابة مباشرة إلى قاعدة الإجابات السحابية داخل الخادم (للمدير)
+    var cloudDbString = getFullCloudDatabase(ss);
+    try {
+      var cloudDb = JSON.parse(cloudDbString);
+      var responsesArr = [];
+      if (cloudDb["formflow_responses"]) {
+        responsesArr = JSON.parse(cloudDb["formflow_responses"]);
+      }
+      
+      var exists = responsesArr.some(function(r) { return r.id === data.rawResponse.id; });
+      if (!exists) {
+        responsesArr.push(data.rawResponse);
+        cloudDb["formflow_responses"] = JSON.stringify(responsesArr);
+        saveFullCloudDatabase(ss, JSON.stringify(cloudDb));
+      }
+    } catch (err) {}
+    
+    return ContentService.createTextOutput("Response Saved & Injected to DB").setMimeType(ContentService.MimeType.TEXT);
+  }
+  
+  // الحالة 3: توافق رجعي للنسخ القديمة
+  else {
+    var respSheet = ss.getSheetByName(RESPONSES_SHEET) || ss.insertSheet(RESPONSES_SHEET);
+    if (respSheet.getLastRow() === 0) respSheet.appendRow(Object.keys(data));
+    var safeValues = Object.values(data).map(function(val) {
+      if (typeof val === 'string' && val.length > MAX_CELL_LENGTH) return "[صورة/بيانات محفوظة]";
+      return val;
+    });
+    respSheet.appendRow(safeValues);
+    return ContentService.createTextOutput("Legacy Response Saved").setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+function doGet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var data = getFullCloudDatabase(ss);
+  return ContentService.createTextOutput(data).setMimeType(ContentService.MimeType.JSON);
+}
