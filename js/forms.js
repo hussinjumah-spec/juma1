@@ -969,6 +969,7 @@ function downloadAllResponsesPdf() {
           </div>
         </div>
         <div class="questions-list">
+          ${form.questions.map((q, qIdx) => {
             const ans = r.answers[q.id];
             let ansText = ans || '-';
             let isCorrect = true;
