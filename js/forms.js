@@ -900,7 +900,7 @@ async function exportToExcel() {
   showToast('تم تصدير الإكسيل مع الصور بنجاح', 'success');
 }
 
-async function downloadAllResponsesPdf() {
+function downloadAllResponsesPdf() {
   const formId = document.getElementById('response-form-filter')?.value || 'all';
   const searchInput = document.getElementById('responses-search');
   const search = (searchInput?.value || '').toLowerCase();
@@ -918,95 +918,93 @@ async function downloadAllResponsesPdf() {
     return;
   }
 
-  showToast('جاري البدء في معالجة التقرير المجمع... يرجى عدم إغلاق الصفحة', 'info');
+  showToast('جاري تحضير نافذة الطباعة المجمعة...', 'info');
+
+  // Create a printable window
+  const printWindow = window.open('', '_blank');
   
-  // Clean up
-  const oldCont = document.getElementById('temp-pdf-export-container');
-  if (oldCont) oldCont.remove();
-
-  const combinedContainer = document.createElement('div');
-  combinedContainer.id = 'temp-pdf-export-container';
-  combinedContainer.style.position = 'absolute';
-  combinedContainer.style.top = '0';
-  combinedContainer.style.right = '-5000px'; // Move out of view but keep "visible"
-  combinedContainer.style.width = '750px'; 
-  combinedContainer.style.background = '#fff';
-  combinedContainer.style.color = '#000';
-  combinedContainer.style.fontSize = '14px';
-
-  // Report Header
   let html = `
-    <div style="text-align:center; padding:30px; border-bottom:4px solid #6C63FF; margin-bottom:40px; font-family: Cairo, Tahoma, sans-serif;">
-      <h1 style="margin:0; font-size:24px; color:#6C63FF">التقرير الشامل لاستجابات النماذج</h1>
-      <p style="margin:10px 0; color:#555">عدد الاستجابات: ${responses.length} استجابة</p>
-      <p style="margin:0; font-size:12px; color:#999">تم الاستخراج في: ${new Date().toLocaleString('ar-SA')}</p>
-    </div>
+    <html dir="rtl" lang="ar">
+    <head>
+      <title>تقرير الاستجابات المجمع</title>
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+      <style>
+        body { font-family: 'Cairo', sans-serif; padding: 20px; color: #333; line-height: 1.6; }
+        .page { page-break-after: always; border-bottom: 2px solid #6C63FF; padding-bottom: 30px; margin-bottom: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .form-title { color: #6C63FF; margin: 0; font-size: 24px; }
+        .participant-info { font-size: 16px; font-weight: bold; margin: 10px 0; }
+        .q-row { background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #eee; }
+        .question { font-weight: bold; color: #555; margin-bottom: 5px; }
+        .answer { color: #0563C1; padding-right: 15px; }
+        .score-box { font-size: 20px; font-weight: 900; color: #27ae60; text-align: left; }
+        @media print {
+          body { padding: 0; }
+          .page { border-bottom: none; }
+        }
+      </style>
+    </head>
+    <body onload="window.print(); window.close();">
+      <div style="text-align:center; margin-bottom:40px; border-bottom: 5px solid #6C63FF; padding:20px">
+        <h1 style="margin:0">تقرير الاستجابات الشامل</h1>
+        <p>عدد المشاركين في هذا التقرير: ${responses.length}</p>
+      </div>
   `;
 
-  for (let idx = 0; idx < responses.length; idx++) {
-    const r = responses[idx];
+  responses.forEach((r, idx) => {
     const form = DB.getFormById(r.formId);
-    if (!form) continue;
+    if (!form) return;
 
     html += `
-      <div style="padding:40px; page-break-after:always; direction:rtl; border-bottom:1px solid #eee">
-        <div style="background:#efefff; padding:15px; border-radius:8px; border:1px solid #6C63FF; margin-bottom:20px">
-          <h2 style="margin:0; color:#6C63FF; font-size:18px">${form.title}</h2>
-          <table style="width:100%; margin-top:10px; border-collapse:collapse">
-            <tr>
-              <td style="padding:5px"><b>اسم المشارك:</b> ${r.respondentName}</td>
-              <td style="padding:5px"><b>رقم الهاتف:</b> ${r.respondentPhone || '-'}</td>
-              <td style="padding:5px; text-align:left"><b>النتيجة:</b> ${form.type === 'quiz' ? r.score + ' / ' + r.totalPoints : 'تم التسليم'}</td>
-            </tr>
-          </table>
+      <div class="page">
+        <div class="header">
+          <div>
+            <h2 class="form-title">${form.title}</h2>
+            <div class="participant-info">المشارك: ${r.respondentName}</div>
+            <div style="font-size:13px; color:#666">الهاتف: ${r.respondentPhone || '-'}</div>
+          </div>
+          <div class="score-box">
+             ${form.type === 'quiz' ? r.score + ' / ' + r.totalPoints : 'تم التسليم'}
+             <div style="font-size:12px; color:#999; font-weight:normal">${new Date(r.submittedAt).toLocaleString('ar-SA')}</div>
+          </div>
         </div>
-        <div>
-          ${form.questions.map((q, qIdx) => {
+        <div class="questions-list">
             const ans = r.answers[q.id];
             let ansText = ans || '-';
+            let isCorrect = true;
+            let correctText = '';
+            const hasCorrectOption = q.options && q.options.some(o => o.correct);
+            const isQuizQuestion = q.points > 0 || hasCorrectOption;
+
             if (q.type === 'multiple-choice' || q.type === 'true-false') {
               const selected = q.options.find(o => o.id === ans);
               ansText = selected ? selected.text : '-';
-            } else if (typeof ans === 'string' && ans.startsWith('http')) {
-              ansText = '[ملف مرفق: ' + ans.substring(0, 30) + '...]';
+              
+              if (isQuizQuestion) {
+                const correctOption = q.options.find(o => o.correct);
+                isCorrect = selected ? selected.correct : false;
+                correctText = correctOption ? correctOption.text : '-';
+              }
             }
+
+            const status = isQuizQuestion ? (isCorrect ? '<span style="color:#27ae60"> [✓ صح]</span>' : '<span style="color:#e74c3c"> [✗ خطأ]</span>') : '';
+            const modelAnswer = (!isCorrect && isQuizQuestion) ? `<div style="color:#27ae60; font-size:13px; margin-top:5px">💡 الإجابة الصحيحة: ${correctText}</div>` : '';
+
             return `
-              <div style="margin-bottom:15px; border-bottom:1px solid #f5f5f5; padding-bottom:8px">
-                <div style="font-weight:bold; color:#444">س${qIdx+1}: ${q.text}</div>
-                <div style="margin-top:5px; color:#0563C1; font-weight:500; padding-right:15px">◀ ${ansText}</div>
+              <div class="q-row">
+                <div class="question">س${qIdx+1}: ${q.text} ${status}</div>
+                <div class="answer">◀ ${ansText}</div>
+                ${modelAnswer}
               </div>
             `;
           }).join('')}
         </div>
       </div>
     `;
-  }
+  });
 
-  combinedContainer.innerHTML = html;
-  document.body.appendChild(combinedContainer);
-
-  const opt = {
-    margin: 10,
-    filename: `التقرير_المجمع_${new Date().getTime()}.pdf`,
-    image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { 
-      scale: 1, // DONT USE 2 FOR BULK, it crashes browsers
-      useCORS: true,
-      logging: false,
-      letterRendering: true
-    },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  // Give more time for the browser to render the complex RTL layout
-  setTimeout(() => {
-    html2pdf().set(opt).from(combinedContainer).save().then(() => {
-      showToast('تم تحميل التقرير المجمع بنجاح', 'success');
-      document.body.removeChild(combinedContainer);
-    }).catch(err => {
-      console.error(err);
-      showToast('فشل إنشاء التقرير المجمع', 'error');
-      document.body.removeChild(combinedContainer);
-    });
-  }, 3000);
+  html += `</body></html>`;
+  
+  printWindow.document.write(html);
+  printWindow.document.close();
 }
