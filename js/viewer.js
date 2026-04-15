@@ -88,6 +88,15 @@ function buildViewerQuestion(q, idx) {
         <div id="file-name-${q.id}" style="margin-top:.75rem;font-size:.85rem;color:var(--primary)"></div>
       </div>
       <input type="file" id="file-${q.id}" accept="image/*" hidden onchange="handleFileUpload('${q.id}', this)">`;
+  } else if (q.type === 'file-upload-general') {
+    inputHtml = `
+      <div class="vq-file-upload" onclick="document.getElementById('file-${q.id}').click()">
+        <i class="fas fa-file-arrow-up"></i>
+        <p>انقر لرفع ملف (PDF, Word, الخ)</p>
+        <p style="font-size:.75rem;margin-top:.25rem">الحد الأقصى المسموح به 10 ميجا</p>
+        <div id="file-name-${q.id}" style="margin-top:.75rem;font-size:.85rem;color:var(--primary)"></div>
+      </div>
+      <input type="file" id="file-${q.id}" hidden onchange="handleGeneralFileUpload('${q.id}', this)">`;
   }
 
   const reqSpan = q.required ? `<span class="vq-required">*</span>` : '';

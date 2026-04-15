@@ -561,12 +561,12 @@
           <div class="section-header-row">
             <div>
               <h2 class="section-title">الإجابات والنتائج</h2>
-              <p class="section-desc">عرض جميع الإجابات المقدمة</p>
+              <p class="section-desc">عرض وتحليل إجابات المشاركين</p>
             </div>
             <div class="header-actions">
-              <select class="form-control" id="response-form-filter" onchange="loadResponsesByForm()">
-                <option value="all">جميع النماذج</option>
-              </select>
+              <button class="btn btn-ghost" onclick="downloadAllResponsesPdf()" title="تحميل كافة الإجابات في ملف واحد">
+                <i class="fas fa-file-pdf" style="color:var(--danger)"></i> تحميل PDF الكل
+              </button>
               <button class="btn btn-success" onclick="exportToExcel()">
                 <i class="fas fa-file-excel"></i> تصدير Excel
               </button>
@@ -574,6 +574,15 @@
                 <i class="fas fa-file-csv"></i> تصدير CSV
               </button>
             </div>
+          </div>
+          <div class="filter-row" style="margin-bottom:1.5rem; display:flex; gap:1rem; align-items:center">
+            <div class="search-box" style="flex:1; position:relative">
+              <i class="fas fa-search" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text-muted)"></i>
+              <input type="text" id="responses-search" class="form-control" placeholder="بحث باسم المشارك أو رقم الهاتف..." oninput="loadResponsesByForm()" style="padding-right:35px; width:100%">
+            </div>
+            <select class="form-control" id="response-form-filter" onchange="loadResponsesByForm()" style="width:250px">
+              <option value="all">جميع النماذج</option>
+            </select>
           </div>
           <div class="responses-table-wrapper">
             <table class="responses-table" id="responses-table">

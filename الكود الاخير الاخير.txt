@@ -1,0 +1,143 @@
+/*
+  ========================================================================
+  FORMFLOW ULTIMATE SYNC & FILE UPLOAD SCRIPT (FINAL VERSION)
+  ========================================================================
+  المميزات:
+  1. دعم رفع الصور، ملفات الـ PDF، والـ Word وكافة الملحقات.
+  2. مزامنة تلقائية مع لوحة التحكم وجوجل شيت.
+  3. تنظيم الملفات في مجلد خاص على جوجل درايف.
+  4. استبدال الملفات بروابط مباشرة لتوفير مساحة جدول البيانات.
+*/
+
+var DATABASE_SHEET = "Cloud_Database"; 
+var RESPONSES_SHEET = "Responses_Data"; 
+var UPLOADS_FOLDER_NAME = "FormFlow_Uploads"; 
+var MAX_CELL_LENGTH = 49000;
+
+// دالة الإعداد - قم بتشغيلها مرة واحدة يدوياً لإعطاء الصلاحيات
+function setup() {
+  getOrCreateFolder(UPLOADS_FOLDER_NAME);
+  return "النظام جاهز للعمل!";
+}
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var payloadString = e.postData.contents;
+  var data = JSON.parse(payloadString);
+  
+  // الحالة 1: مزامنة النماذج والإعدادات
+  if (Object.keys(data).some(function(k) { return k.indexOf('formflow_') === 0; })) {
+    saveFullCloudDatabase(ss, payloadString);
+    return ContentService.createTextOutput("Sync Success").setMimeType(ContentService.MimeType.TEXT);
+  } 
+  
+  // الحالة 2: إرسال إجابة جديدة (مع ملفات مرفقة)
+  else if (data.type === 'individual_response') {
+    var respSheet = ss.getSheetByName(RESPONSES_SHEET) || ss.insertSheet(RESPONSES_SHEET);
+    var folder = getOrCreateFolder(UPLOADS_FOLDER_NAME);
+    
+    var answers = data.rawResponse.answers;
+    var flatData = data.flatData;
+    
+    // فحص الإجابات بحثاً عن أي ملفات Base64 (صور أو مستندات)
+    for (var qId in answers) {
+      var val = answers[qId];
+      if (typeof val === 'string' && val.indexOf('data:') === 0) {
+        // رفع الملف والحصول على الرابط
+        var fileUrl = saveFileToDrive(val, "Ref_" + qId, folder);
+        
+        // استبدال كود الملف بالرابط في الإكسيل
+        for (var label in flatData) {
+          if (flatData[label] === val) flatData[label] = fileUrl;
+        }
+        
+        // تحديث الرابط في الإجابة الخام
+        answers[qId] = fileUrl;
+      }
+    }
+
+    // إضافة الصف لجدول البيانات
+    if (respSheet.getLastRow() === 0) respSheet.appendRow(Object.keys(flatData));
+    respSheet.appendRow(Object.values(flatData));
+    
+    // إضافة الإجابة لقاعدة البيانات السحابية (المزامنة)
+    updateCloudResponses(ss, data.rawResponse);
+    
+    return ContentService.createTextOutput("Saved Successfully").setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// دالة رفع أي نوع من الملفات للدرايف
+function saveFileToDrive(base64Data, baseName, folder) {
+  try {
+    var parts = base64Data.split(',');
+    var contentType = parts[0].match(/:(.*?);/)[1];
+    var bytes = Utilities.base64Decode(parts[1]);
+    
+    // تحديد الامتداد بناءً على نوع الملف
+    var ext = "file";
+    if (contentType.indexOf('image/') > -1) ext = contentType.split('/')[1];
+    else if (contentType.indexOf('pdf') > -1) ext = "pdf";
+    else if (contentType.indexOf('word') > -1 || contentType.indexOf('officedocument') > -1) ext = "docx";
+    else if (contentType.indexOf('excel') > -1 || contentType.indexOf('sheet') > -1) ext = "xlsx";
+    
+    var fileName = baseName + "_" + Utilities.formatDate(new Date(), "GMT+3", "yyyyMMdd_HHmm") + "." + ext;
+    var blob = Utilities.newBlob(bytes, contentType, fileName);
+    
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return file.getUrl();
+  } catch (e) {
+    return "[فشل الرفع: " + e.toString() + "]";
+  }
+}
+
+// مضافة: تحديث قاعدة بيانات المشاركات في السحابة
+function updateCloudResponses(ss, newResponse) {
+  var cloudDbString = getFullCloudDatabase(ss);
+  try {
+    var cloudDb = JSON.parse(cloudDbString);
+    var responsesArr = [];
+    if (cloudDb["formflow_responses"]) {
+      responsesArr = JSON.parse(cloudDb["formflow_responses"]);
+    }
+    
+    // منع التكرار
+    var exists = responsesArr.some(function(r) { return r.id === newResponse.id; });
+    if (!exists) {
+      responsesArr.push(newResponse);
+      cloudDb["formflow_responses"] = JSON.stringify(responsesArr);
+      saveFullCloudDatabase(ss, JSON.stringify(cloudDb));
+    }
+  } catch (err) {}
+}
+
+function getOrCreateFolder(name) {
+  var folders = DriveApp.getFoldersByName(name);
+  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(name);
+  folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return folder;
+}
+
+function getFullCloudDatabase(ss) {
+  var sheet = ss.getSheetByName(DATABASE_SHEET);
+  if (!sheet) return "{}";
+  var values = sheet.getRange(1, 1, sheet.getLastRow() || 1, 1).getValues();
+  return values.map(function(row) { return row[0]; }).join('') || "{}";
+}
+
+function saveFullCloudDatabase(ss, payloadString) {
+  var syncSheet = ss.getSheetByName(DATABASE_SHEET) || ss.insertSheet(DATABASE_SHEET);
+  syncSheet.clear();
+  var chunks = [];
+  for (var i = 0; i < payloadString.length; i += MAX_CELL_LENGTH) {
+    chunks.push([payloadString.substring(i, i + MAX_CELL_LENGTH)]);
+  }
+  if (chunks.length > 0) syncSheet.getRange(1, 1, chunks.length, 1).setValues(chunks);
+}
+
+function doGet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  return ContentService.createTextOutput(getFullCloudDatabase(ss)).setMimeType(ContentService.MimeType.JSON);
+}
+

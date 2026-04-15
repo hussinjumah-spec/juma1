@@ -593,14 +593,28 @@ function initNewForm() {
 
 // -------- RESPONSES --------
 function renderResponses(formId = 'all') {
-  const allResponses = formId === 'all' ? DB.getResponses() : DB.getResponsesByForm(formId);
+  const searchInput = document.getElementById('responses-search');
+  const search = (searchInput?.value || '').toLowerCase();
+  
+  let allResponses = formId === 'all' ? DB.getResponses() : DB.getResponsesByForm(formId);
+  
+  // Filter by search
+  if (search) {
+    allResponses = allResponses.filter(r => 
+      (r.respondentName || '').toLowerCase().includes(search) || 
+      (r.respondentPhone || '').toLowerCase().includes(search)
+    );
+  }
+
   const tbody = document.getElementById('responses-tbody');
 
   // Populate filter dropdown
   const select = document.getElementById('response-form-filter');
   const forms = DB.getForms();
-  select.innerHTML = '<option value="all">جميع النماذج</option>' +
-    forms.map(f => `<option value="${f.id}">${f.title}</option>`).join('');
+  if (select.options.length <= 1) {
+    select.innerHTML = '<option value="all">جميع النماذج</option>' +
+      forms.map(f => `<option value="${f.id}">${f.title}</option>`).join('');
+  }
   select.value = formId;
 
   if (allResponses.length === 0) {
@@ -658,12 +672,21 @@ function viewResponseDetail(respId) {
     if (q.type === 'multiple-choice' || q.type === 'true-false') {
       const opt = q.options.find(o => o.id === ans);
       ansText = opt ? opt.text : 'لم يجب';
-    } else if (typeof ans === 'string' && (ans.startsWith('data:image') || ans.startsWith('http'))) {
-      const isImg = ans.startsWith('data:image') || /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(ans) || ans.includes('drive.google.com');
+    } else if (typeof ans === 'string' && (ans.startsWith('data:') || ans.startsWith('http'))) {
+      const isImg = ans.startsWith('data:image') || /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(ans) || ans.includes('googlesyndication') || ans.includes('googleusercontent');
+      const isPdf = ans.includes('.pdf') || (ans.startsWith('data:application/pdf'));
+      
       if (isImg) {
         ansText = `<div style="margin-top:10px;"><img src="${ans}" style="max-height: 150px; border-radius: 8px; border: 1px solid var(--primary); cursor: pointer;" onclick="window.open('${ans}', '_blank')"></div>`;
       } else {
-        ansText = ans;
+        const icon = isPdf ? 'fa-file-pdf' : 'fa-file-lines';
+        const color = isPdf ? 'var(--danger)' : 'var(--primary)';
+        ansText = `<div style="margin-top:10px;">
+                    <a href="${ans}" target="_blank" style="display:inline-flex;align-items:center;gap:10px;padding:8px 15px;background:var(--dark-2);border-radius:8px;text-decoration:none;color:var(--text);border:1px solid #444">
+                      <i class="fas ${icon}" style="color:${color};font-size:1.2rem"></i>
+                      <span>فتح المرفق</span>
+                    </a>
+                   </div>`;
       }
     } else {
       ansText = ans || 'لم يجب';
@@ -875,4 +898,115 @@ async function exportToExcel() {
   a.click();
   
   showToast('تم تصدير الإكسيل مع الصور بنجاح', 'success');
+}
+
+async function downloadAllResponsesPdf() {
+  const formId = document.getElementById('response-form-filter')?.value || 'all';
+  const searchInput = document.getElementById('responses-search');
+  const search = (searchInput?.value || '').toLowerCase();
+  
+  let responses = formId === 'all' ? DB.getResponses() : DB.getResponsesByForm(formId);
+  
+  if (search) {
+    responses = responses.filter(r => 
+      (r.respondentName || '').toLowerCase().includes(search) || (r.respondentPhone || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (responses.length === 0) {
+    showToast('لا توجد إجابات لتصديرها', 'error');
+    return;
+  }
+
+  showToast('جاري البدء في معالجة التقرير المجمع... يرجى عدم إغلاق الصفحة', 'info');
+  
+  // Clean up
+  const oldCont = document.getElementById('temp-pdf-export-container');
+  if (oldCont) oldCont.remove();
+
+  const combinedContainer = document.createElement('div');
+  combinedContainer.id = 'temp-pdf-export-container';
+  combinedContainer.style.position = 'absolute';
+  combinedContainer.style.top = '0';
+  combinedContainer.style.right = '-5000px'; // Move out of view but keep "visible"
+  combinedContainer.style.width = '750px'; 
+  combinedContainer.style.background = '#fff';
+  combinedContainer.style.color = '#000';
+  combinedContainer.style.fontSize = '14px';
+
+  // Report Header
+  let html = `
+    <div style="text-align:center; padding:30px; border-bottom:4px solid #6C63FF; margin-bottom:40px; font-family: Cairo, Tahoma, sans-serif;">
+      <h1 style="margin:0; font-size:24px; color:#6C63FF">التقرير الشامل لاستجابات النماذج</h1>
+      <p style="margin:10px 0; color:#555">عدد الاستجابات: ${responses.length} استجابة</p>
+      <p style="margin:0; font-size:12px; color:#999">تم الاستخراج في: ${new Date().toLocaleString('ar-SA')}</p>
+    </div>
+  `;
+
+  for (let idx = 0; idx < responses.length; idx++) {
+    const r = responses[idx];
+    const form = DB.getFormById(r.formId);
+    if (!form) continue;
+
+    html += `
+      <div style="padding:40px; page-break-after:always; direction:rtl; border-bottom:1px solid #eee">
+        <div style="background:#efefff; padding:15px; border-radius:8px; border:1px solid #6C63FF; margin-bottom:20px">
+          <h2 style="margin:0; color:#6C63FF; font-size:18px">${form.title}</h2>
+          <table style="width:100%; margin-top:10px; border-collapse:collapse">
+            <tr>
+              <td style="padding:5px"><b>اسم المشارك:</b> ${r.respondentName}</td>
+              <td style="padding:5px"><b>رقم الهاتف:</b> ${r.respondentPhone || '-'}</td>
+              <td style="padding:5px; text-align:left"><b>النتيجة:</b> ${form.type === 'quiz' ? r.score + ' / ' + r.totalPoints : 'تم التسليم'}</td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          ${form.questions.map((q, qIdx) => {
+            const ans = r.answers[q.id];
+            let ansText = ans || '-';
+            if (q.type === 'multiple-choice' || q.type === 'true-false') {
+              const selected = q.options.find(o => o.id === ans);
+              ansText = selected ? selected.text : '-';
+            } else if (typeof ans === 'string' && ans.startsWith('http')) {
+              ansText = '[ملف مرفق: ' + ans.substring(0, 30) + '...]';
+            }
+            return `
+              <div style="margin-bottom:15px; border-bottom:1px solid #f5f5f5; padding-bottom:8px">
+                <div style="font-weight:bold; color:#444">س${qIdx+1}: ${q.text}</div>
+                <div style="margin-top:5px; color:#0563C1; font-weight:500; padding-right:15px">◀ ${ansText}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  combinedContainer.innerHTML = html;
+  document.body.appendChild(combinedContainer);
+
+  const opt = {
+    margin: 10,
+    filename: `التقرير_المجمع_${new Date().getTime()}.pdf`,
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { 
+      scale: 1, // DONT USE 2 FOR BULK, it crashes browsers
+      useCORS: true,
+      logging: false,
+      letterRendering: true
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Give more time for the browser to render the complex RTL layout
+  setTimeout(() => {
+    html2pdf().set(opt).from(combinedContainer).save().then(() => {
+      showToast('تم تحميل التقرير المجمع بنجاح', 'success');
+      document.body.removeChild(combinedContainer);
+    }).catch(err => {
+      console.error(err);
+      showToast('فشل إنشاء التقرير المجمع', 'error');
+      document.body.removeChild(combinedContainer);
+    });
+  }, 3000);
 }
